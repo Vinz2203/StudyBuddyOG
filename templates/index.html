@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
+    <title>StudyBuddy</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-core.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-clike.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-javascript.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-cpp.min.js" defer></script>
+
+</head>
+<body>
+    <h1>StudyBuddy</h1>
+    <p>Paste text, then click a button:</p>
+
+    <textarea id="studyText" rows="8" cols="60" placeholder="paste your notes here...."></textarea>
+    <label style="display: inline-flex;align-items: center;gap: 8px;margin: 8px 0;">
+        <input type="checkbox" id="useAI">Use AI
+    </label>
+    <button id="makeCards">Make Flashcards</button>
+    <button id="makeQuiz">Make Quiz</button>
+
+    <h2>Flashcards</h2>
+    <div id="cards" class="cards-container"></div>
+
+    <h2>Review Due Today</h2>
+    <div id="reviewDue"></div>
+
+    <h2>Quiz</h2>
+    <div id="quiz"></div>
+
+    <h2>Code Lab (for CS Students)</h2>
+    <p>Paste code and turn it into flashcards or quiz questions.</p>
+
+    <label style="display: inline-flex;align-items: center;gap: 8px;margin: 8px 0;">
+        Language:
+        <select id="codeLanguage">
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="cpp">C++</option>
+        </select>
+    </label>
+
+    <textarea id="codeInput" rows="8" cols="60" placeholder="Paste your code here..."></textarea>
+
+    <div style="margin: 8px 0;">
+        <button id="explainCodeBtn">Create "Explain this code" Card</button>
+        <button id="findBugBtn">Create "Find the bug" Card</button>
+        <button id="predictOutputBtn">Create "Predict the output" Quiz</button>
+    </div>
+
+    <button id="checkQuiz">Check Answers</button>
+    <button id="retryQuiz">Retry Quiz</button>
+    <span id="quizScore" style="margin-left:8px; font-weight: 700;"></span>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
