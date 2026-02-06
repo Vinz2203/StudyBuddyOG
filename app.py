@@ -3,7 +3,7 @@ import os, json, re
 from flask import Flask, render_template, request, jsonify
 from openai import OpenAI
 from dotenv import load_dotenv
-
+#hello how are you
 # 1. Load Keys
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY", "").strip()
