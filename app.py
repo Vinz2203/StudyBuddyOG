@@ -9,6 +9,8 @@ api_key = os.getenv("OPENAI_API_KEY", "").strip()
 app = Flask(__name__)
 client = OpenAI(api_key=api_key)
 
+#this is a new update from jose perez
+
 if not api_key:
     print("❌ ERROR: OPENAI_API_KEY not found in .env file!")
 else:
