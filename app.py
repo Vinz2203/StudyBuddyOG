@@ -128,8 +128,14 @@ CODE:
 def route_flashcards():
     data = request.get_json(silent=True) or {}
     text = (data.get("text") or "").strip()
+<<<<<<< Updated upstream
     if len(text) > 4000:
         return jsonify({"error": "Input too long (max 4000 chars)"}), 400
+=======
+    if len(text) > 5000:
+        return jsonify({"error": "Text too long! Keep it under 5000 chars."}), 400
+    use_ai = data.get("ai") is True
+>>>>>>> Stashed changes
     if not text: return jsonify({"flashcards": []})
 
     use_ai = data.get("ai") is True
@@ -150,8 +156,13 @@ def route_flashcards():
 def route_quiz():
     data = request.get_json(silent=True) or {}
     text = (data.get("text") or "").strip()
+<<<<<<< Updated upstream
     if len(text) > 4000:
         return jsonify({"error": "Text is too long"}), 400
+=======
+    if len(text) > 5000:
+        return jsonify({"error": "Text too long! Keep it under 5000 chars."}), 400
+>>>>>>> Stashed changes
     if not text: return jsonify({"questions": []})
 
     try:
