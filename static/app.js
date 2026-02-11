@@ -43,17 +43,20 @@ document.getElementById("makeQuiz").onclick = async () => {
         data.questions.forEach((q, qIdx) => {
             const qDiv = document.createElement("div");
             qDiv.className = "quiz-card";
+            
+            // SANITIZE BOTH THE QUESTION AND EXPLANATION
+            const cleanQ = DOMPurify.sanitize(q.question);
+            const cleanEx = DOMPurify.sanitize(q.explanation);
+        
             qDiv.innerHTML = `
-                <p><b>Q${qIdx + 1}: ${escapeHTML(q.question)}</b></p>
+                <p><b>Q${qIdx+1}: ${cleanQ}</b></p>
                 <div class="quiz-options">
-                    ${q.options.map((opt) => `
-                        <label><input type="radio" name="q${qIdx}" value="${escapeHTML(opt)}"> ${escapeHTML(opt)}</label>
-                    `).join('')}
+                    ${q.options.map(opt => `<label><input type="radio" name="q${qIdx}" value="${escapeHTML(opt)}"> ${escapeHTML(opt)}</label>`).join('')}
                 </div>
                 <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none'">Check Answer</button>
-                <div class="quiz-feedback" style="display:none; margin-top:10px; padding:10px; border-radius:8px; background: rgba(255,255,255,0.1);">
+                <div class="quiz-feedback" style="display:none; margin-top:10px;">
                     <p><b>Answer:</b> ${escapeHTML(q.answer)}</p>
-                    <p><i>${escapeHTML(q.explanation)}</i></p>
+                    <p><i>${cleanEx}</i></p>
                 </div>`;
             container.appendChild(qDiv);
         });
@@ -72,13 +75,19 @@ document.getElementById("makeCards").onclick = async () => {
         data.flashcards.forEach(c => {
             const card = document.createElement("div");
             card.className = "flashcard";
-            const cleanBack = marked.parse(c.back); // Applies the Markdown fix
-            card.innerHTML = `<div class="flashcard-inner">
-                <div class="flashcard-front"><b>${escapeHTML(c.front)}</b></div>
-                <div class="flashcard-back">${cleanBack}</div>
-            </div>`;
+            
+            // 1. Parse Markdown
+            const rawHtml = marked.parse(c.back);
+            // 2. WASH the HTML (Crucial security step)
+            const cleanHtml = DOMPurify.sanitize(rawHtml);
+            
+            card.innerHTML = `
+                <div class="flashcard-inner">
+                    <div class="flashcard-front"><b>${escapeHTML(c.front)}</b></div>
+                    <div class="flashcard-back">${cleanHtml}</div>
+                </div>`;
             card.onclick = () => card.classList.toggle("flipped");
-            container.appendChild(card);
+            $("#cards").prepend(card);
         });
     } finally { toggleLoading("makeCards", false, "Make Flashcards"); }
 };
@@ -94,11 +103,17 @@ document.getElementById("explainCodeBtn").onclick = async () => {
         data.flashcards.forEach(c => {
             const card = document.createElement("div");
             card.className = "flashcard";
-            const cleanBack = marked.parse(c.back);
-            card.innerHTML = `<div class="flashcard-inner">
-                <div class="flashcard-front"><b>Explain: ${escapeHTML(c.front)}</b></div>
-                <div class="flashcard-back">${cleanBack}</div>
-            </div>`;
+            
+            // 1. Parse Markdown
+            const rawHtml = marked.parse(c.back);
+            // 2. WASH the HTML (Crucial security step)
+            const cleanHtml = DOMPurify.sanitize(rawHtml);
+            
+            card.innerHTML = `
+                <div class="flashcard-inner">
+                    <div class="flashcard-front"><b>${escapeHTML(c.front)}</b></div>
+                    <div class="flashcard-back">${cleanHtml}</div>
+                </div>`;
             card.onclick = () => card.classList.toggle("flipped");
             $("#cards").prepend(card);
         });
@@ -117,10 +132,12 @@ document.getElementById("findBugBtn").onclick = async () => {
         data.flashcards.forEach(c => {
             const card = document.createElement("div");
             card.className = "flashcard";
-            const cleanBack = marked.parse(c.back);
+            //const cleanBack = marked.parse(c.back);
+            const rawHtml = marked.parse(c.back);
+            const cleanHtml = DOMPurify.sanitize(rawHtml);
             card.innerHTML = `<div class="flashcard-inner">
                 <div class="flashcard-front"><b>🚩 Bug Hunt (${lang})</b></div>
-                <div class="flashcard-back">${cleanBack}</div>
+                <div class="flashcard-back">${cleanHtml}</div>
             </div>`;
             card.onclick = () => card.classList.toggle("flipped");
             $("#cards").prepend(card);
