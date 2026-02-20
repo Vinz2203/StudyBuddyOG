@@ -57,23 +57,6 @@ document.getElementById("makeQuiz").onclick = async () => {
         data.questions.forEach((q, qIdx) => {
             const qDiv = document.createElement("div");
             qDiv.className = "quiz-card";
-<<<<<<< Updated upstream
-            
-            // SANITIZE BOTH THE QUESTION AND EXPLANATION
-            const cleanQ = DOMPurify.sanitize(q.question);
-            const cleanEx = DOMPurify.sanitize(q.explanation);
-        
-            qDiv.innerHTML = `
-                <p><b>Q${qIdx+1}: ${cleanQ}</b></p>
-                <div class="quiz-options">
-                    ${q.options.map(opt => `<label><input type="radio" name="q${qIdx}" value="${escapeHTML(opt)}"> ${escapeHTML(opt)}</label>`).join('')}
-                </div>
-                <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none'">Check Answer</button>
-                <div class="quiz-feedback" style="display:none; margin-top:10px;">
-                    <p><b>Answer:</b> ${escapeHTML(q.answer)}</p>
-                    <p><i>${cleanEx}</i></p>
-                </div>`;
-=======
             qDiv.style.marginBottom = "20px";
             
             const rawHtml = `
@@ -94,7 +77,6 @@ document.getElementById("makeQuiz").onclick = async () => {
             
             //  Security: Sanitize and inject
             qDiv.innerHTML = DOMPurify.sanitize(rawHtml);
->>>>>>> Stashed changes
             container.appendChild(qDiv);
         });
         
@@ -120,19 +102,6 @@ document.getElementById("makeCards").onclick = async () => {
         data.flashcards.forEach(c => {
             const card = document.createElement("div");
             card.className = "flashcard";
-<<<<<<< Updated upstream
-            
-            // 1. Parse Markdown
-            const rawHtml = marked.parse(c.back);
-            // 2. WASH the HTML (Crucial security step)
-            const cleanHtml = DOMPurify.sanitize(rawHtml);
-            
-            card.innerHTML = `
-                <div class="flashcard-inner">
-                    <div class="flashcard-front"><b>${escapeHTML(c.front)}</b></div>
-                    <div class="flashcard-back">${cleanHtml}</div>
-                </div>`;
-=======
             const cleanBack = DOMPurify.sanitize(marked.parse(c.back));
             const cleanFront = DOMPurify.sanitize(c.front);
             card.innerHTML = `
@@ -141,9 +110,8 @@ document.getElementById("makeCards").onclick = async () => {
                 <div class="flashcard-back">${cleanBack}</div>
             </div>`;
 
->>>>>>> Stashed changes
             card.onclick = () => card.classList.toggle("flipped");
-            $("#cards").prepend(card);
+            container.appendChild(card);
         });
     } finally { toggleLoading("makeCards", false, "Make Flashcards"); }
 };
@@ -159,19 +127,6 @@ document.getElementById("explainCodeBtn").onclick = async () => {
         data.flashcards.forEach(c => {
             const card = document.createElement("div");
             card.className = "flashcard";
-<<<<<<< Updated upstream
-            
-            // 1. Parse Markdown
-            const rawHtml = marked.parse(c.back);
-            // 2. WASH the HTML (Crucial security step)
-            const cleanHtml = DOMPurify.sanitize(rawHtml);
-            
-            card.innerHTML = `
-                <div class="flashcard-inner">
-                    <div class="flashcard-front"><b>${escapeHTML(c.front)}</b></div>
-                    <div class="flashcard-back">${cleanHtml}</div>
-                </div>`;
-=======
             const cleanBack = DOMPurify.sanitize(marked.parse(c.back));
             const cleanFront = DOMPurify.sanitize(c.front);
             card.innerHTML = `
@@ -180,7 +135,6 @@ document.getElementById("explainCodeBtn").onclick = async () => {
                 <div class="flashcard-back">${cleanBack}</div>
             </div>`;
 
->>>>>>> Stashed changes
             card.onclick = () => card.classList.toggle("flipped");
             $("#cards").prepend(card);
         });
@@ -199,15 +153,6 @@ document.getElementById("findBugBtn").onclick = async () => {
         data.flashcards.forEach(c => {
             const card = document.createElement("div");
             card.className = "flashcard";
-<<<<<<< Updated upstream
-            //const cleanBack = marked.parse(c.back);
-            const rawHtml = marked.parse(c.back);
-            const cleanHtml = DOMPurify.sanitize(rawHtml);
-            card.innerHTML = `<div class="flashcard-inner">
-                <div class="flashcard-front"><b>🚩 Bug Hunt (${lang})</b></div>
-                <div class="flashcard-back">${cleanHtml}</div>
-            </div>`;
-=======
             const cleanFront = DOMPurify.sanitize(c.front);
             const cleanBack = DOMPurify.sanitize(marked.parse(c.back));
             card.innerHTML = `
@@ -215,7 +160,6 @@ document.getElementById("findBugBtn").onclick = async () => {
                     <div class="flashcard-front"><b>${cleanFront}</b></div>
                     <div class="flashcard-back">${cleanBack}</div>
                 </div>`;
->>>>>>> Stashed changes
             card.onclick = () => card.classList.toggle("flipped");
             $("#cards").prepend(card);
         });
