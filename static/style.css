@@ -1,4 +1,4 @@
-/* --- 1. THEME VARIABLES --- */
+/* ---  THEME VARIABLES --- */
 :root {
     --bg: #0b1220;
     --text: #e8f0ff;
@@ -15,7 +15,7 @@
     --accent: #2563eb;
 }
 
-/* --- 2. GLOBAL RESET & LAYOUT --- */
+/* ---  GLOBAL RESET & LAYOUT --- */
 * { 
     box-sizing: border-box; 
     transition: background 0.3s, color 0.3s, transform 0.2s; 
@@ -42,7 +42,7 @@ h1, h2 {
     -webkit-text-fill-color: transparent; 
 }
 
-/* --- 3. GLASSMORPHISM PANELS --- */
+/* ---  GLASSMORPHISM PANELS --- */
 textarea, .quiz-card, .dashboard-header, #reviewDue {
     background: var(--panel) !important;
     backdrop-filter: blur(12px);
@@ -61,7 +61,7 @@ textarea {
     resize: vertical;
 }
 
-/* --- 4. BUTTONS --- */
+/* ---  BUTTONS --- */
 button {
     background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: white;
@@ -79,7 +79,7 @@ button:hover {
 
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* --- 5. FIXED 3D FLASHCARDS (Stops the "bleeding") --- */
+/* ---  FIXED 3D FLASHCARDS (Stops the "bleeding") --- */
 .flashcard { 
     perspective: 1000px; 
     margin-bottom: 30px; 
@@ -125,7 +125,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
     font-size: 14px;
 }
 
-/* --- 6. MARKDOWN & CODE INSIDE CARDS --- */
+/* ---  MARKDOWN & CODE INSIDE CARDS --- */
 .flashcard-back h3 {
     margin: 15px 0 8px 0;
     font-size: 16px;
@@ -143,7 +143,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
     margin: 10px 0;
 }
 
-/* --- 7. QUIZ STYLING --- */
+/* ---  QUIZ STYLING --- */
 .quiz-options {
     display: flex;
     flex-direction: column;

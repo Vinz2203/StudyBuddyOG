@@ -31,18 +31,33 @@ async function postJSON(url, body) {
     return resp.json();
 }
 
-// --- Make Quiz Logic ---
+
+// Make Quiz Logic 
 document.getElementById("makeQuiz").onclick = async () => {
+    // Properly define the input text and target container
     const text = $("#studyText").value.trim();
-    if (!text) return alert("Paste text first!");
-    toggleLoading("makeQuiz", true, "Make Quiz");
     const container = $("#quiz");
-    container.innerHTML = "";
+
+    // Validate input
+    if (!text) return alert("Paste text first!");
+
+    // Start loading state
+    toggleLoading("makeQuiz", true, "Make Quiz");
+    
     try {
+        // Fetch the data from your Flask API
         const data = await postJSON("/api/quiz", { text });
+        container.innerHTML = ""; // Clear old content
+        
+        if (!data.questions || data.questions.length === 0) {
+            container.innerHTML = "<p>No questions generated. Try more text.</p>";
+            return;
+        }
+
         data.questions.forEach((q, qIdx) => {
             const qDiv = document.createElement("div");
             qDiv.className = "quiz-card";
+<<<<<<< Updated upstream
             
             // SANITIZE BOTH THE QUESTION AND EXPLANATION
             const cleanQ = DOMPurify.sanitize(q.question);
@@ -58,12 +73,42 @@ document.getElementById("makeQuiz").onclick = async () => {
                     <p><b>Answer:</b> ${escapeHTML(q.answer)}</p>
                     <p><i>${cleanEx}</i></p>
                 </div>`;
+=======
+            qDiv.style.marginBottom = "20px";
+            
+            const rawHtml = `
+            <p><b>Q${qIdx + 1}: ${escapeHTML(q.question)}</b></p>
+            <div class="quiz-options">
+                ${q.options.map(opt => `
+                    <label style="display:block; margin: 5px 0;">
+                        <input type="radio" name="q${qIdx}" value="${escapeHTML(opt)}"> 
+                        ${escapeHTML(opt)}
+                    </label>
+                `).join('')}
+            </div>
+            <button class="check-btn">Check Answer</button> 
+            <div class="quiz-feedback" style="display:none; margin-top:10px; padding:10px; border-radius:8px; background: rgba(255,255,255,0.1);">
+                <p><b>Correct Answer:</b> ${escapeHTML(q.answer)}</p>
+                <p><i>${escapeHTML(q.explanation || "")}</i></p>
+            </div>`;
+            
+            //  Security: Sanitize and inject
+            qDiv.innerHTML = DOMPurify.sanitize(rawHtml);
+>>>>>>> Stashed changes
             container.appendChild(qDiv);
         });
-    } finally { toggleLoading("makeQuiz", false, "Make Quiz"); }
+        
+        container.scrollIntoView({ behavior: "smooth" });
+    } catch (err) {
+        console.error("Quiz Error:", err);
+        alert("Failed to create quiz. Check console.");
+    } finally { 
+        //  Reset loading state
+        toggleLoading("makeQuiz", false, "Make Quiz"); 
+    }
 };
 
-// --- Make Flashcards Logic ---
+// Make Flashcards Logic 
 document.getElementById("makeCards").onclick = async () => {
     const text = $("#studyText").value.trim();
     if (!text) return alert("Paste text first!");
@@ -75,6 +120,7 @@ document.getElementById("makeCards").onclick = async () => {
         data.flashcards.forEach(c => {
             const card = document.createElement("div");
             card.className = "flashcard";
+<<<<<<< Updated upstream
             
             // 1. Parse Markdown
             const rawHtml = marked.parse(c.back);
@@ -86,13 +132,23 @@ document.getElementById("makeCards").onclick = async () => {
                     <div class="flashcard-front"><b>${escapeHTML(c.front)}</b></div>
                     <div class="flashcard-back">${cleanHtml}</div>
                 </div>`;
+=======
+            const cleanBack = DOMPurify.sanitize(marked.parse(c.back));
+            const cleanFront = DOMPurify.sanitize(c.front);
+            card.innerHTML = `
+            <div class="flashcard-inner">
+                <div class="flashcard-front"><b>${cleanFront}</b></div>
+                <div class="flashcard-back">${cleanBack}</div>
+            </div>`;
+
+>>>>>>> Stashed changes
             card.onclick = () => card.classList.toggle("flipped");
             $("#cards").prepend(card);
         });
     } finally { toggleLoading("makeCards", false, "Make Flashcards"); }
 };
 
-// --- Explain Code Logic (FIXED) ---
+// Explain Code Logic
 document.getElementById("explainCodeBtn").onclick = async () => {
     const code = $("#codeInput").value.trim();
     const lang = $("#codeLanguage").value;
@@ -103,6 +159,7 @@ document.getElementById("explainCodeBtn").onclick = async () => {
         data.flashcards.forEach(c => {
             const card = document.createElement("div");
             card.className = "flashcard";
+<<<<<<< Updated upstream
             
             // 1. Parse Markdown
             const rawHtml = marked.parse(c.back);
@@ -114,6 +171,16 @@ document.getElementById("explainCodeBtn").onclick = async () => {
                     <div class="flashcard-front"><b>${escapeHTML(c.front)}</b></div>
                     <div class="flashcard-back">${cleanHtml}</div>
                 </div>`;
+=======
+            const cleanBack = DOMPurify.sanitize(marked.parse(c.back));
+            const cleanFront = DOMPurify.sanitize(c.front);
+            card.innerHTML = `
+            <div class="flashcard-inner">
+                <div class="flashcard-front"><b>${cleanFront}</b></div>
+                <div class="flashcard-back">${cleanBack}</div>
+            </div>`;
+
+>>>>>>> Stashed changes
             card.onclick = () => card.classList.toggle("flipped");
             $("#cards").prepend(card);
         });
@@ -121,7 +188,7 @@ document.getElementById("explainCodeBtn").onclick = async () => {
     } finally { toggleLoading("explainCodeBtn", false, "Create 'Explain code' Card"); }
 };
 
-// --- Find Bug Logic ---
+//  Find Bug Logic
 document.getElementById("findBugBtn").onclick = async () => {
     const code = $("#codeInput").value.trim();
     const lang = $("#codeLanguage").value;
@@ -132,6 +199,7 @@ document.getElementById("findBugBtn").onclick = async () => {
         data.flashcards.forEach(c => {
             const card = document.createElement("div");
             card.className = "flashcard";
+<<<<<<< Updated upstream
             //const cleanBack = marked.parse(c.back);
             const rawHtml = marked.parse(c.back);
             const cleanHtml = DOMPurify.sanitize(rawHtml);
@@ -139,11 +207,34 @@ document.getElementById("findBugBtn").onclick = async () => {
                 <div class="flashcard-front"><b>🚩 Bug Hunt (${lang})</b></div>
                 <div class="flashcard-back">${cleanHtml}</div>
             </div>`;
+=======
+            const cleanFront = DOMPurify.sanitize(c.front);
+            const cleanBack = DOMPurify.sanitize(marked.parse(c.back));
+            card.innerHTML = `
+                <div class="flashcard-inner">
+                    <div class="flashcard-front"><b>${cleanFront}</b></div>
+                    <div class="flashcard-back">${cleanBack}</div>
+                </div>`;
+>>>>>>> Stashed changes
             card.onclick = () => card.classList.toggle("flipped");
             $("#cards").prepend(card);
         });
     } finally { toggleLoading("findBugBtn", false, "Create 'Find the bug' Card"); }
 };
+
+document.getElementById("quiz").addEventListener("click", (e) => {
+    if (e.target && e.target.classList.contains("check-btn")) {
+        const btn = e.target;
+        const feedback = btn.nextElementSibling;
+        
+        // Show the feedback div
+        if (feedback) {
+            feedback.style.display = 'block';
+        }
+        // Hide the button
+        btn.style.display = 'none';
+    }
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     const tBtn = document.getElementById("themeToggle");

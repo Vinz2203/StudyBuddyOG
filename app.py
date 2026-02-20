@@ -2,7 +2,10 @@ import os, json, re
 from flask import Flask, render_template, request, jsonify
 from openai import OpenAI
 from dotenv import load_dotenv
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
+<<<<<<< Updated upstream
 # 1. Load Keys
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY", "").strip()
@@ -14,14 +17,42 @@ client = OpenAI(api_key=api_key)
 # 3. Check Key
 if not api_key:
     print("❌ ERROR: OPENAI_API_KEY not found!")
+=======
+app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["100 per day", "20 per hour"],
+    storage_uri="memory://"
+)
+#  Load Keys
+load_dotenv()
+def get_openai_client():
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY not found in enviroment")
+    return OpenAI(api_key=api_key)
+
+try:
+    client = get_openai_client()
+except ValueError as e:
+    print("Critical error {e}")
+client = OpenAI(api_key=api_key)
+
+
+if not api_key:
+    print("ERROR: OPENAI_API_KEY not found in .env file!")
+>>>>>>> Stashed changes
 else:
-    print("✅ API Key successfully loaded.")
+    print("API Key successfully loaded.")
 
 # 4. NOW define your routes
 @app.get("/")
 def home():
     return render_template("index.html")
 
+<<<<<<< Updated upstream
 # ... rest of your code ...
 
 # --- UPDATED AI HELPER FUNCTIONS (The "Brain") ---
@@ -103,7 +134,103 @@ CODE:
     raw = resp.choices[0].message.content or ""
     match = re.search(r"\{.*\}|\[.*\]", raw, flags=re.DOTALL)
     return json.loads(match.group(0)) if match else {"flashcards": []}
+=======
 
+def ai_build_flashcards(text: str, max_cards: int = 12):
+    try:
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system", 
+                    "content": (
+                        f"You are a Senior Software Engineering Mentor. Create up to {max_cards} high-yield flashcards. "
+                        "Focus on 'Why' things work, common pitfalls, and technical accuracy. "
+                        "Return ONLY valid JSON in this structure: "
+                        '{"flashcards": [{"front": "...", "back": "..."}]}'
+                    )
+                },
+                {
+                    "role": "user", 
+                    "content": f"TEXT TO ANALYZE:\n{text}"
+                }
+            ]
+        )
+        
+        raw = resp.choices[0].message.content or ""
+        
+        # Extract JSON from the response
+        match = re.search(r"\{.*\}", raw, flags=re.DOTALL)
+        if match:
+            return json.loads(match.group(0))
+            
+        return {"flashcards": [{"front": "Error", "back": "AI response was not in JSON format."}]}
+
+    except Exception as e:
+        print(f"Flashcard Error: {e}")
+        return {"flashcards": [{"front": "System Error", "back": str(e)}]}
+
+
+def ai_build_quiz(text: str, max_q: int = 5):
+    try:
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages = [
+                {"role": "system", "content": "You are a Technical Interviewer. Output ONLY valid JSON in the format: {'questions': [{'question': '...', 'options': [], 'answer': '...', 'explanation': '...'}]}"},
+                {"role": "user", "content": f"Create {max_q} questions based on this text: {text}"}
+            ],
+            response_format={ "type": "json_object" } # Forces OpenAI to return JSON
+        )
+        return json.loads(resp.choices[0].message.content)
+    except Exception as e:
+        print(f"Quiz AI Error: {e}")
+        return {"questions": []}
+
+
+def ai_explain_code(code: str, lang: str):
+    try:
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": f"Explain this {lang} code... (return JSON)"}],
+            response_format={ "type": "json_object" } # Force JSON mode
+        )
+        return json.loads(resp.choices[0].message.content)
+    except Exception as e:
+        return {"flashcards": [{"front": "Error", "back": "Could not parse AI response."}]}
+
+
+def ai_find_bug(code: str, lang: str):
+    try:
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system", 
+                    "content": (
+                        "You are a Senior Software Architect. Your goal is to find logic bugs or security flaws. "
+                        "You must return ONLY valid JSON in this exact structure: "
+                        '{"flashcards": [{"front": "Bug Hunting", "back": "### 🚩 THE BUG\\n...\\n\\n### ✅ THE FIX\\n...\\n\\n### 💡 SENIOR TIP\\n..."}]}'
+                    )
+                },
+                {
+                    "role": "user", 
+                    "content": f"Analyze this {lang} code for bugs:\n\n{code}"
+                }
+            ]
+        )
+        
+        raw = resp.choices[0].message.content or ""
+        # Cleans up potential markdown blocks the AI might add
+        match = re.search(r"\{.*\}", raw, flags=re.DOTALL)
+        if match:
+            return json.loads(match.group(0))
+        
+        return {"flashcards": [{"front": "Error", "back": "AI failed to format JSON."}]}
+>>>>>>> Stashed changes
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return {"flashcards": [{"front": "System Error", "back": str(e)}]}
 def ai_predict_output(code: str, lang: str):
     prompt = f"""
 Create a "Predict the Output" challenge for this {lang} code. Include tricky edge cases.
@@ -122,18 +249,24 @@ CODE:
     match = re.search(r"\{.*\}|\[.*\]", raw, flags=re.DOTALL)
     return json.loads(match.group(0)) if match else {"questions": []}
 
-# --- ROUTES ---
+#ROUTES 
 
 @app.post("/api/flashcards")
+@limiter.limit("10 per minute")
 def route_flashcards():
     data = request.get_json(silent=True) or {}
     text = (data.get("text") or "").strip()
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
     if len(text) > 4000:
         return jsonify({"error": "Input too long (max 4000 chars)"}), 400
 =======
     if len(text) > 5000:
         return jsonify({"error": "Text too long! Keep it under 5000 chars."}), 400
+=======
+    if len(text) > 5000: # SECURITY
+        return jsonify({"error": "Text too long. Limit is 5000 characters."}), 400  
+>>>>>>> Stashed changes
     use_ai = data.get("ai") is True
 >>>>>>> Stashed changes
     if not text: return jsonify({"flashcards": []})
@@ -153,6 +286,7 @@ def route_flashcards():
         return jsonify({"flashcards": cards})
 
 @app.post("/api/quiz")
+@limiter.limit("5 per minute")
 def route_quiz():
     data = request.get_json(silent=True) or {}
     text = (data.get("text") or "").strip()
@@ -227,4 +361,9 @@ def route_predict_output():
         return jsonify({"error": "AI failed to process this request"}), 500
 
 if __name__ == "__main__":
+<<<<<<< Updated upstream
     app.run(debug=False, port=5000)
+=======
+    debug_mode = os.getenv("DEBUG", "false").lower() == "true"
+    app.run(debug=is_dev, port=5000)
+>>>>>>> Stashed changes
